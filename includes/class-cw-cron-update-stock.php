@@ -57,9 +57,11 @@ if (!class_exists('CW_Update_Stock')) :
 			$cw_products_names_array = array();
 
 			$cw_product_id = array();
+
+			$cw_product_ids = array();
 			
 			foreach ($cw_products as $cw_product) {
-				$cw_products_names_array[] =  htmlspecialchars_decode($cw_product->getIdentifier());
+				$cw_products_names_array[] =  $cw_product->getIdentifier();
 			}
 
 			$products = get_posts(array(
@@ -76,18 +78,19 @@ if (!class_exists('CW_Update_Stock')) :
 			
 			foreach ($products as $product) {
 				$cw_product_id = get_post_meta($product->ID, CodesWholesaleConst::PRODUCT_CODESWHOLESALE_ID_PROP_NAME, true);
+				$cw_product_ids[] = get_post_meta($product->ID, CodesWholesaleConst::PRODUCT_CODESWHOLESALE_ID_PROP_NAME, true);
 				$products_ids[$cw_product_id] = $product;
             }
 			
-			$cw_products_not_set = array_diff($cw_products_names_array, $cw_product_id);
-			$cw_products_no_more = array_diff($cw_product_id, $cw_products_names_array);
+			$cw_products_not_set = array_diff($cw_products_names_array, $cw_product_ids);
+			$cw_products_no_more = array_diff($cw_product_ids, $cw_products_names_array);
 
 			sort($cw_products);
 			
 			foreach ($cw_products as $cw_product) {
 				echo $cw_product->getName() . "\n";
-				if (in_array(htmlspecialchars_decode($cw_product->getIdentifier()), $cw_products_not_set)) {
-
+				if (!isset($products_ids[$cw_product->getProductId()])) {
+				
 					echo "Adding Product... \n";
 
 					if ( $cw_product->getReleaseDate() == '' ) {
